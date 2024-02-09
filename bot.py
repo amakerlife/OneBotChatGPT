@@ -1,10 +1,16 @@
 from chatgpt import chat
 from msg import send_message
 from flask import Flask, request
+import configparser
 
 app = Flask(__name__)
 
 chat_history = {}
+
+config = configparser.ConfigParser()
+config.read("config.cfg")
+
+prefix = config.get("message", "prefix")
 
 
 @app.route('/', methods=['POST'])
@@ -30,7 +36,7 @@ def handle_request():
             print("Chat history cleared")
             send_message(sender_id, "[AI] Chat history cleared")
             return '', 204
-        if not message.startswith("ask"):
+        if not message.startswith(prefix):
             print(f"{sender_id}({sender_nickname}) -> {self_id} : {message} (PASSED)")
             return '', 204
 

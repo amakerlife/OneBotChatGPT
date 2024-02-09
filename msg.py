@@ -1,11 +1,17 @@
 import json
 import requests
+import configparser
+
+config = configparser.ConfigParser()
+config.read("config.cfg")
+
+http_url = config.get("onebot", "http_url")
 
 
 def send_message(user_id, content):
-    url = 'http://localhost:3000/send_private_msg'
+    url = f"{http_url}/send_private_msg"
     headers = {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
     }
     data = {
         "user_id": user_id,

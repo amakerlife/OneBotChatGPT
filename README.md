@@ -17,5 +17,5 @@ git clone https://github.com/amakerlife/OneBotChatGPT
 cd OneBotChatGPT
 mv config.example.cfg config.cfg
 vim config.cfg
-python3 bot.py
+python bot.py
 ```

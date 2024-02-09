@@ -5,10 +5,9 @@ import configparser
 config = configparser.ConfigParser()
 config.read("config.cfg")
 
-# Extract settings from configuration file
-endpoint = config.get("settings", "endpoint")
-token = config.get("settings", "token")
-model = config.get("settings", "model")
+endpoint = config.get("chatgpt", "endpoint")
+token = config.get("chatgpt", "token")
+model = config.get("chatgpt", "model")
 
 
 def chat(message, history):
