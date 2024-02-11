@@ -36,14 +36,14 @@ def handle_request():
             print("Chat history cleared")
             send_message(sender_id, "[AI] Chat history cleared")
             return '', 204
-        if not message.startswith(prefix):
+        if ((not message.startswith(prefix)) and prefix != "") or message.startswith("[AI]"):
             if sender_id != self_id:
                 print(f"{sender_id}({sender_nickname}) -> {self_id}: {message} (PASSED)")
             else:
                 print(f"{sender_id}({sender_nickname}) -> Unknown User: {message} (PASSED)")
             return '', 204
 
-        message = message[4:]
+        message = message[len(prefix):]
         if sender_id != self_id:
             print(f"{sender_id}({sender_nickname}) -> {self_id}: {message}")
         else:
