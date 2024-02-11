@@ -43,7 +43,10 @@ def handle_request():
                 print(f"{sender_id}({sender_nickname}) -> Unknown User: {message} (PASSED)")
             return '', 204
 
-        message = message[len(prefix):]
+        prefix_len = len(prefix)
+        if prefix != "":
+            prefix_len += 1
+        message = message[prefix_len:]
         if sender_id != self_id:
             print(f"{sender_id}({sender_nickname}) -> {self_id}: {message}")
         else:
