@@ -36,11 +36,8 @@ def handle_request():
             print("Chat history cleared")
             send_message(sender_id, "[AI] Chat history cleared")
             return '', 204
-        if ((not message.startswith(prefix)) and prefix != "") or message.startswith("[AI]"):
-            if sender_id != self_id:
-                print(f"{sender_id}({sender_nickname}) -> {self_id}: {message} (PASSED)")
-            else:
-                print(f"{sender_id}({sender_nickname}) -> Unknown User: {message} (PASSED)")
+        if ((not message.startswith(prefix)) and prefix != "") or message.startswith("[AI]") or sender_id != self_id:
+            print(f"{sender_id}({sender_nickname}) -> Unknown User: {message} (PASSED)")
             return '', 204
 
         prefix_len = len(prefix)
@@ -63,4 +60,5 @@ def handle_request():
 
 
 if __name__ == "__main__":
+    print(f"正在使用配置：\n消息触发前缀：{prefix}\n")
     app.run(host='127.0.0.1', port=5000)
