@@ -31,6 +31,6 @@ def chat(message, history):
 
 
 if __name__ == "__main__":
-    chat_history = [{"role": "system", "content": "You are a helpful assistant."}]
-    answer, chat_history = chat("Hello", chat_history)
+    private_chat_history = [{"role": "system", "content": "You are a helpful assistant."}]
+    answer, private_chat_history = chat("Hello", private_chat_history)
     print(answer)

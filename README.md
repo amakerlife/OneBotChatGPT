@@ -20,3 +20,7 @@ vim config.cfg
 pip install -r requirements.txt
 python bot.py
 ```
+
+## Todo List
+
+[ ] 在群聊中使用 @ 触发机器人
