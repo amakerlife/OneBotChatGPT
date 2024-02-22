@@ -25,7 +25,7 @@ def send_private_message(user_id, content):
     response = requests.post(url, headers=headers, data=json.dumps(data))
     if response.status_code == 200:
         result = response.json()
-        if result["status"] == 0:
+        if result["status"] == "ok":
             print(f"Successfully sent message: {content}")
             return True
         else:
@@ -57,7 +57,7 @@ def send_group_message(group_id, sender_id, content):
     response = requests.post(url, headers=headers, data=json.dumps(data))
     if response.status_code == 200:
         result = response.json()
-        if result["status"] == 0:
+        if result["status"] == "ok":
             print(f"Successfully sent message: {content}")
             return True
         else:

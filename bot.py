@@ -34,7 +34,7 @@ def handle_request():
     if message_type == "private":
         sender_history = private_chat_history.get(sender_id, [])
         if ((not message.startswith(prefix)) and prefix != "") or message.startswith("[AI]"):
-            print(f"Private: {sender_id}({sender_nickname}) -> Unknown User: {message} (PASSED)")
+            print(f"Private: {sender_id}({sender_nickname}) -> Unknown User: {message} (IGNORED)")
             return '', 204
 
         if sender_id != self_id:
@@ -62,10 +62,10 @@ def handle_request():
         group_id = request_data.get("group_id", "")
         group_history = group_chat_history.get(group_id, [])
         if str(group_id) not in allowed_groups:
-            print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (PASSED)")
+            print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (IGNORED)")
             return '', 204
         if ((not message.startswith(prefix)) and prefix != "") or message.startswith("[AI]"):
-            print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (PASSED)")
+            print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (IGNORED)")
             return '', 204
 
         print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message}")

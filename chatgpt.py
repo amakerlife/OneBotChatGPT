@@ -23,10 +23,13 @@ def chat(message, history):
     response = requests.post(endpoint, headers=headers, data=json.dumps(data))
     if response.status_code == 200:
         result = response.json()
-        answer = result["choices"][0]["message"]["content"]
-        history.append({"role": "assistant", "content": answer})
+        try:
+            answer = result["choices"][0]["message"]["content"]
+            history.append({"role": "assistant", "content": answer})
+        except KeyError:
+            answer = f"Error: {response.text}"
     else:
-        answer = "Error: " + response.text
+        answer = f"Error: {response.text}"
     return answer, history
 
 
