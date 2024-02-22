@@ -52,10 +52,14 @@ def handle_request():
             send_private_message(sender_id, "[AI] Chat history cleared")
             return '', 204
         print(f"Processing message: {message}")
-        answer, sender_history = chat(message, sender_history)
+        answer, sender_history, status = chat(message, sender_history)
+        if status != 0:
+            print(answer)
+            send_private_message(sender_id, f"[AI] An error occurred(Code {status}): {answer}")
+            return '', 204
         private_chat_history[sender_id] = sender_history
         print(f"Answer from GPT: {answer}")
-        send_private_message(sender_id, "[AI] " + answer)
+        send_private_message(sender_id, f"[AI] {answer}")
         return '', 204
 
     elif message_type == "group":
@@ -79,10 +83,14 @@ def handle_request():
             send_group_message(group_id, sender_id, "[AI] Chat history cleared")
             return '', 204
         print(f"Processing message: {message}")
-        answer, group_history = chat(message, group_history)
+        answer, group_history, status = chat(message, group_history)
+        if status != 0:
+            print(f"Error: {answer}")
+            send_private_message(sender_id, f"[AI] An error occurred(Code {status}): {answer}")
+            return '', 204
         group_chat_history[group_id] = group_history
         print(f"Answer from GPT: {answer}")
-        send_group_message(group_id, sender_id, "[AI] " + answer)
+        send_group_message(group_id, sender_id, f"[AI] {answer}")
         return '', 204
 
     else:
