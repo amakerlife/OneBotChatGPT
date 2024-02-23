@@ -5,9 +5,11 @@ import configparser
 config = configparser.ConfigParser()
 config.read("config.cfg")
 
-endpoint = config.get("chatgpt", "endpoint")
+chat_endpoint = config.get("chatgpt", "chat_endpoint")
+draw_endpoint = config.get("chatgpt", "draw_endpoint")
 token = config.get("chatgpt", "token")
-model = config.get("chatgpt", "model")
+chat_model = config.get("chatgpt", "chat_model")
+draw_model = config.get("chatgpt", "draw_model")
 timeout = config.get("chatgpt", "timeout")
 
 
@@ -18,12 +20,12 @@ def chat(message, history):
         "Authorization": f"Bearer {token}",
     }
     data = {
-        "model": model,
+        "model": chat_model,
         "messages": history
     }
     status = -1  # -1: undefined, 0: ok, 1: response json error, 2: HTTP status error, 3: timeout
     try:
-        response = requests.post(endpoint, headers=headers, data=json.dumps(data), timeout=(20, int(timeout)))
+        response = requests.post(chat_endpoint, headers=headers, data=json.dumps(data), timeout=(20, int(timeout)))
         if response.status_code == 200:
             result = response.json()
             try:
@@ -40,6 +42,35 @@ def chat(message, history):
         answer = "Error: Timeout"
         status = 3
     return answer, history, status
+
+
+def draw(prompt):
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}",
+    }
+    data = {
+        "model": draw_model,
+        "prompt": prompt
+    }
+    status = -1  # -1: undefined, 0: ok, 1: response json error, 2: HTTP status error, 3: timeout
+    try:
+        response = requests.post(draw_endpoint, headers=headers, data=json.dumps(data), timeout=(20, int(timeout)))
+        if response.status_code == 200:
+            result = response.json()
+            try:
+                answer = result["data"][0]["url"]
+                status = 0
+            except KeyError:
+                answer = f"Error: {response.text}"
+                status = 1
+        else:
+            answer = f"Error: {response.text}"
+            status = 2
+    except requests.exceptions.Timeout:
+        answer = "Error: Timeout"
+        status = 3
+    return answer, status
 
 
 if __name__ == "__main__":

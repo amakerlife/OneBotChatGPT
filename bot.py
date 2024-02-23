@@ -1,5 +1,5 @@
-from chatgpt import chat
-from msg import send_private_message, send_group_message
+from chatgpt import chat, draw
+from msg import send_private_message, send_group_message, send_private_img, send_group_img
 from flask import Flask, request
 import configparser
 
@@ -11,7 +11,8 @@ group_chat_history = {}
 config = configparser.ConfigParser()
 config.read("config.cfg")
 
-prefix = config.get("message", "prefix")
+chat_prefix = config.get("message", "chat_prefix")
+draw_prefix = config.get("message", "draw_prefix")
 allowed_groups = config.get("message", "allowed_groups").split(", ")
 
 
@@ -31,70 +32,102 @@ def handle_request():
     message_type = request_data.get("message_type", "")
     message = request_data.get("message", [])[0].get("data", {}).get("text", "")
 
-    if message_type == "private":
-        sender_history = private_chat_history.get(sender_id, [])
-        if ((not message.startswith(prefix)) and prefix != "") or message.startswith("[AI]"):
-            print(f"Private: {sender_id}({sender_nickname}) -> Unknown User: {message} (IGNORED)")
-            return '', 204
+    if message.startswith("[AI]"):
+        print(f"Private: {sender_id}({sender_nickname}) -> Unknown User: {message} (IGNORED)")
 
-        if sender_id != self_id:
-            print(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message}")
-        else:
-            print(f"Private: {sender_id}({sender_nickname}) -> Unknown User: {message}")
-
-        prefix_len = len(prefix)
-        if prefix != "":
-            prefix_len += 1
-        message = message[prefix_len:]
+    elif message_type == "private":  # 私聊消息
         if message.startswith("cls"):
             private_chat_history[sender_id] = []
             print("Chat history cleared")
             send_private_message(sender_id, "[AI] Chat history cleared")
-            return '', 204
-        print(f"Processing message: {message}")
-        answer, sender_history, status = chat(message, sender_history)
-        if status != 0:
-            print(answer)
-            send_private_message(sender_id, f"[AI] An error occurred(Code {status}): {answer}")
-            return '', 204
-        private_chat_history[sender_id] = sender_history
-        print(f"Answer from GPT: {answer}")
-        send_private_message(sender_id, f"[AI] {answer}")
+
+        elif message.startswith(chat_prefix):  # 私聊 Text to Text
+            print(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message} (Text to Text)")
+
+            sender_history = private_chat_history.get(sender_id, [])
+            chat_prefix_len = len(chat_prefix)
+            if chat_prefix != "":
+                chat_prefix_len += 1
+            message = message[chat_prefix_len:]
+            print(f"Processing chat prompt: {message}")
+            answer, sender_history, status = chat(message, sender_history)
+            if status != 0:
+                print(answer)
+                send_private_message(sender_id, f"[AI] An error occurred(Code {status}): {answer}")
+                return '', 204
+            private_chat_history[sender_id] = sender_history
+            print(f"Response from GPT: {answer}")
+            send_private_message(sender_id, f"[AI] {answer}")
+
+        elif message.startswith(draw_prefix):  # 私聊 Text to Image
+            print(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message} (Text to Image)")
+            if draw_prefix == "":
+                print("Draw prefix not set, ignored")
+                send_private_message(sender_id, "[AI] The feature is not enabled")
+                return '', 204
+            draw_prefix_len = len(draw_prefix) + 1
+            message = message[draw_prefix_len:]
+            print(f"Processing draw prompt: {message}")
+            url, status = draw(message)
+            if status != 0:
+                print(url)
+                send_private_message(sender_id, f"[AI] An error occurred(Code {status}): {url}")
+                return '', 204
+            print(f"Response from GPT: {url}")
+            send_private_img(sender_id, url)
+
+        else:
+            print(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message} (IGNORED)")
+
         return '', 204
 
-    elif message_type == "group":
+    elif message_type == "group":  # 群聊消息
         group_id = request_data.get("group_id", "")
         group_history = group_chat_history.get(group_id, [])
         if str(group_id) not in allowed_groups:
             print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (IGNORED)")
-            return '', 204
-        if ((not message.startswith(prefix)) and prefix != "") or message.startswith("[AI]"):
-            print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (IGNORED)")
-            return '', 204
 
-        print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message}")
-        prefix_len = len(prefix)
-        if prefix != "":
-            prefix_len += 1
-        message = message[prefix_len:]
-        if message.startswith("cls"):
+        elif message.startswith("cls"):
             group_chat_history[group_id] = []
             print("Chat history cleared")
             send_group_message(group_id, sender_id, "[AI] Chat history cleared")
-            return '', 204
-        print(f"Processing message: {message}")
-        answer, group_history, status = chat(message, group_history)
-        if status != 0:
-            print(f"Error: {answer}")
-            send_private_message(sender_id, f"[AI] An error occurred(Code {status}): {answer}")
-            return '', 204
-        group_chat_history[group_id] = group_history
-        print(f"Answer from GPT: {answer}")
-        send_group_message(group_id, sender_id, f"[AI] {answer}")
-        return '', 204
 
-    else:
-        return '', 204
+        elif message.startswith(chat_prefix):  # 群聊 Text to Text
+            print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (Text to Text)")
+            chat_prefix_len = len(chat_prefix)
+            if chat_prefix != "":
+                chat_prefix_len += 1
+            message = message[chat_prefix_len:]
+            print(f"Processing chat prompt: {message}")
+            answer, group_history, status = chat(message, group_history)
+            if status != 0:
+                print(answer)
+                send_group_message(group_id, sender_id, f"[AI] An error occurred(Code {status}): {answer}")
+                return '', 204
+            group_chat_history[group_id] = group_history
+            print(f"Response from GPT: {answer}")
+            send_group_message(group_id, sender_id, f"[AI] {answer}")
+
+        elif message.startswith(draw_prefix):  # 群聊 Text to Image
+            print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (Text to Image)")
+            if draw_prefix == "":
+                print("Draw prefix not set, ignored")
+                send_group_message(group_id, sender_id, "[AI] The feature is not enabled")
+                return '', 204
+            draw_prefix_len = len(draw_prefix) + 1
+            message = message[draw_prefix_len:]
+            print(f"Processing draw prompt: {message}")
+            url, status = draw(message)
+            if status != 0:
+                print(url)
+                send_group_message(group_id, sender_id, f"[AI] An error occurred(Code {status}): {url}")
+                return '', 204
+            print(f"Response from GPT: {url}")
+            send_group_img(group_id, sender_id, url)
+
+        else:
+            print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (IGNORED)")
+    return '', 204
 
 
 if __name__ == "__main__":
