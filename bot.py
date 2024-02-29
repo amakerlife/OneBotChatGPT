@@ -2,6 +2,7 @@ from chatgpt import chat, draw
 from msg import send_private_message, send_group_message, send_private_img, send_group_img
 from flask import Flask, request
 import configparser
+from loguru import logger
 
 app = Flask(__name__)
 
@@ -33,51 +34,50 @@ def handle_request():
     message = request_data.get("message", [])[0].get("data", {}).get("text", "")
 
     if message.startswith("[AI]"):
-        print(f"Private: {sender_id}({sender_nickname}) -> Unknown User: {message} (IGNORED)")
+        logger.info(f"Private: {sender_id}({sender_nickname}) -> Unknown User: {message} (IGNORED)")
 
     elif message_type == "private":  # 私聊消息
         if message.startswith("cls"):
             private_chat_history[sender_id] = []
-            print("Chat history cleared")
+            logger.success("Chat history cleared")
             send_private_message(sender_id, "[AI] Chat history cleared")
 
         elif message.startswith(chat_prefix):  # 私聊 Text to Text
-            print(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message} (Text to Text)")
-
+            logger.info(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message} (Text to Text)")
             sender_history = private_chat_history.get(sender_id, [])
             chat_prefix_len = len(chat_prefix)
             if chat_prefix != "":
                 chat_prefix_len += 1
             message = message[chat_prefix_len:]
-            print(f"Processing chat prompt: {message}")
+            logger.info(f"Processing chat prompt: {message}")
             answer, sender_history, status = chat(message, sender_history)
             if status != 0:
-                print(answer)
+                logger.error(answer)
                 send_private_message(sender_id, f"[AI] An error occurred(Code {status}): {answer}")
                 return '', 204
             private_chat_history[sender_id] = sender_history
-            print(f"Response from GPT: {answer}")
+            logger.info(f"Response from GPT: {answer}")
             send_private_message(sender_id, f"[AI] {answer}")
 
         elif message.startswith(draw_prefix):  # 私聊 Text to Image
-            print(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message} (Text to Image)")
+            logger.info(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message} (Text to Image)")
             if draw_prefix == "":
-                print("Draw prefix not set, ignored")
+                logger.warning("Draw prefix not set, ignored")
                 send_private_message(sender_id, "[AI] The feature is not enabled")
                 return '', 204
             draw_prefix_len = len(draw_prefix) + 1
             message = message[draw_prefix_len:]
-            print(f"Processing draw prompt: {message}")
+            logger.info(f"Processing draw prompt: {message}")
             url, status = draw(message)
             if status != 0:
-                print(url)
+                logger.error(url)
                 send_private_message(sender_id, f"[AI] An error occurred(Code {status}): {url}")
                 return '', 204
-            print(f"Response from GPT: {url}")
+            logger.info(f"Response from GPT: {url}")
             send_private_img(sender_id, url)
 
         else:
-            print(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message} (IGNORED)")
+            logger.info(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message} (IGNORED)")
 
         return '', 204
 
@@ -85,51 +85,51 @@ def handle_request():
         group_id = request_data.get("group_id", "")
         group_history = group_chat_history.get(group_id, [])
         if str(group_id) not in allowed_groups:
-            print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (IGNORED)")
+            logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (IGNORED)")
 
         elif message.startswith("cls"):
             group_chat_history[group_id] = []
-            print("Chat history cleared")
+            logger.success("Chat history cleared")
             send_group_message(group_id, sender_id, "[AI] Chat history cleared")
 
         elif message.startswith(chat_prefix):  # 群聊 Text to Text
-            print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (Text to Text)")
+            logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (Text to Text)")
             chat_prefix_len = len(chat_prefix)
             if chat_prefix != "":
                 chat_prefix_len += 1
             message = message[chat_prefix_len:]
-            print(f"Processing chat prompt: {message}")
+            logger.info(f"Processing chat prompt: {message}")
             answer, group_history, status = chat(message, group_history)
             if status != 0:
-                print(answer)
+                logger.error(answer)
                 send_group_message(group_id, sender_id, f"[AI] An error occurred(Code {status}): {answer}")
                 return '', 204
             group_chat_history[group_id] = group_history
-            print(f"Response from GPT: {answer}")
+            logger.info(f"Response from GPT: {answer}")
             send_group_message(group_id, sender_id, f"[AI] {answer}")
 
         elif message.startswith(draw_prefix):  # 群聊 Text to Image
-            print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (Text to Image)")
+            logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (Text to Image)")
             if draw_prefix == "":
-                print("Draw prefix not set, ignored")
+                logger.warning("Draw prefix not set, ignored")
                 send_group_message(group_id, sender_id, "[AI] The feature is not enabled")
                 return '', 204
             draw_prefix_len = len(draw_prefix) + 1
             message = message[draw_prefix_len:]
-            print(f"Processing draw prompt: {message}")
+            logger.info(f"Processing draw prompt: {message}")
             url, status = draw(message)
             if status != 0:
-                print(url)
+                logger.error(url)
                 send_group_message(group_id, sender_id, f"[AI] An error occurred(Code {status}): {url}")
                 return '', 204
-            print(f"Response from GPT: {url}")
+            logger.info(f"Response from GPT: {url}")
             send_group_img(group_id, sender_id, url)
 
         else:
-            print(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (IGNORED)")
+            logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (IGNORED)")
     return '', 204
 
 
 if __name__ == "__main__":
-    # print(f"正在使用配置：\n消息触发前缀：{prefix}\n")
+    # logger.info(f"正在使用配置：\n消息触发前缀：{prefix}\n")
     app.run(host="127.0.0.1", port=5000)

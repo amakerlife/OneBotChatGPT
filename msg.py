@@ -1,6 +1,8 @@
 import json
 import requests
 import configparser
+from loguru import logger
+
 
 config = configparser.ConfigParser()
 config.read("config.cfg")
@@ -26,13 +28,13 @@ def send_private_message(user_id, content):
     if response.status_code == 200:
         result = response.json()
         if result["status"] == "ok":
-            print(f"Successfully sent message: {content}")
+            logger.success(f"Successfully sent message: {content}")
             return True
         else:
-            print(f"Failed to send message, response: {str(result)}")
+            logger.error(f"Failed to send message, response: {str(result)}")
             return False
     else:
-        print(f"Failed to send message, status code: {str(response.status_code)}")
+        logger.error(f"Failed to send message, status code: {str(response.status_code)}")
         return False
 
 
@@ -58,13 +60,13 @@ def send_group_message(group_id, sender_id, content):
     if response.status_code == 200:
         result = response.json()
         if result["status"] == "ok":
-            print(f"Successfully sent message: {content}")
+            logger.success(f"Successfully sent message: {content}")
             return True
         else:
-            print(f"Failed to send message, response: {str(result)}")
+            logger.error(f"Failed to send message, response: {str(result)}")
             return False
     else:
-        print(f"Failed to send message, status code: {str(response.status_code)}")
+        logger.error(f"Failed to send message, status code: {str(response.status_code)}")
         return False
 
 
@@ -86,13 +88,13 @@ def send_private_img(user_id, content):
     if response.status_code == 200:
         result = response.json()
         if result["status"] == "ok":
-            print(f"Successfully sent image: {content}")
+            logger.success(f"Successfully sent image: {content}")
             return True
         else:
-            print(f"Failed to send image, response: {str(result)}")
+            logger.error(f"Failed to send image, response: {str(result)}")
             return False
     else:
-        print(f"Failed to send image, status code: {str(response.status_code)}")
+        logger.error(f"Failed to send image, status code: {str(response.status_code)}")
         return False
 
 
@@ -118,11 +120,11 @@ def send_group_img(group_id, sender_id, content):
     if response.status_code == 200:
         result = response.json()
         if result["status"] == "ok":
-            print(f"Successfully sent message: {content}")
+            logger.success(f"Successfully sent message: {content}")
             return True
         else:
-            print(f"Failed to send message, response: {str(result)}")
+            logger.error(f"Failed to send message, response: {str(result)}")
             return False
     else:
-        print(f"Failed to send message, status code: {str(response.status_code)}")
+        logger.error(f"Failed to send message, status code: {str(response.status_code)}")
         return False
