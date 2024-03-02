@@ -1,13 +1,9 @@
 import json
 import requests
-import configparser
 from loguru import logger
+from config import onebot_config
 
-
-config = configparser.ConfigParser()
-config.read("config.cfg")
-
-http_url = config.get("onebot", "http_url")
+http_url = onebot_config.http_url
 
 
 def send_private_message(user_id, content):

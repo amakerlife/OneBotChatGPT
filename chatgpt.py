@@ -1,17 +1,14 @@
 import requests
 import json
-import configparser
 from loguru import logger
+from config import chatgpt_config
 
-config = configparser.ConfigParser()
-config.read("config.cfg")
-
-chat_endpoint = config.get("chatgpt", "chat_endpoint")
-draw_endpoint = config.get("chatgpt", "draw_endpoint")
-token = config.get("chatgpt", "token")
-chat_model = config.get("chatgpt", "chat_model")
-draw_model = config.get("chatgpt", "draw_model")
-timeout = config.get("chatgpt", "timeout")
+chat_endpoint = chatgpt_config.chat_endpoint
+draw_endpoint = chatgpt_config.draw_endpoint
+token = chatgpt_config.token
+chat_model = chatgpt_config.chat_model
+draw_model = chatgpt_config.draw_model
+timeout = chatgpt_config.timeout
 
 
 def chat(message, history):
@@ -77,4 +74,4 @@ def draw(prompt):
 if __name__ == "__main__":
     _private_chat_history = [{"role": "system", "content": "You are a helpful assistant."}]
     _answer, _private_chat_history, _status = chat("Hello", _private_chat_history)
-    print(_answer)
+    logger.info(_answer)

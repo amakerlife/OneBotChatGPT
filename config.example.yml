@@ -1,0 +1,25 @@
+# OneBot 设置
+onebot:
+  # OneBot 正向 HTTP 地址
+  http_url: "http://localhost:3000"
+
+# ChatGPT 设置
+chatgpt:
+  # ChatGPT 聊天 API 请求地址
+  chat_endpoint: ""
+  # ChatGPT 绘图 API 请求地址
+  draw_endpoint: ""
+  token: ""
+  chat_model: "gpt-3.5-turbo"
+  draw_model: "gpt-3.5-turbo"
+  # 请求超时时间（秒）
+  timeout: 180
+
+message:
+  # 聊天触发前缀
+  chat_prefix: "ask"
+  # 绘图触发前缀
+  draw_prefix: "draw"
+  # 允许使用的群聊
+  allowed_groups:
+    - 123456789

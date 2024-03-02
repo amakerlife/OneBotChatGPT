@@ -1,20 +1,18 @@
 from chatgpt import chat, draw
 from msg import send_private_message, send_group_message, send_private_img, send_group_img
 from flask import Flask, request
-import configparser
 from loguru import logger
+from config import message_config
+import logging
 
 app = Flask(__name__)
 
 private_chat_history = {}
 group_chat_history = {}
 
-config = configparser.ConfigParser()
-config.read("config.cfg")
-
-chat_prefix = config.get("message", "chat_prefix")
-draw_prefix = config.get("message", "draw_prefix")
-allowed_groups = config.get("message", "allowed_groups").split(", ")
+chat_prefix = message_config.chat_prefix
+draw_prefix = message_config.draw_prefix
+allowed_groups = message_config.allowed_groups
 
 
 @app.route("/", methods=["POST"])
