@@ -3,7 +3,6 @@ from msg import send_private_message, send_group_message, send_private_img, send
 from flask import Flask, request
 from loguru import logger
 from config import message_config
-import logging
 
 app = Flask(__name__)
 
@@ -36,6 +35,7 @@ def handle_request():
 
     elif message_type == "private":  # 私聊消息
         if message.startswith("cls"):
+            logger.info(f"Private: {sender_id}({sender_nickname}) -> Unknown User: {message}")
             private_chat_history[sender_id] = []
             logger.success("Chat history cleared")
             send_private_message(sender_id, "[AI] Chat history cleared")
@@ -86,6 +86,7 @@ def handle_request():
             logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (IGNORED)")
 
         elif message.startswith("cls"):
+            logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message}")
             group_chat_history[group_id] = []
             logger.success("Chat history cleared")
             send_group_message(group_id, sender_id, "[AI] Chat history cleared")

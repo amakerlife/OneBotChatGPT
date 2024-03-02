@@ -12,7 +12,6 @@ timeout = chatgpt_config.timeout
 
 
 def chat(message, history):
-    history.append({"role": "user", "content": message})
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token}",
@@ -28,6 +27,7 @@ def chat(message, history):
             result = response.json()
             try:
                 answer = result["choices"][0]["message"]["content"]
+                history.append({"role": "user", "content": message})
                 history.append({"role": "assistant", "content": answer})
                 status = 0
             except KeyError:
