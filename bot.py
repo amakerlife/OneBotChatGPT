@@ -82,7 +82,7 @@ def handle_request():
     elif message_type == "group":  # 群聊消息
         group_id = request_data.get("group_id", "")
         group_history = group_chat_history.get(group_id, [])
-        if str(group_id) not in allowed_groups:
+        if group_id not in allowed_groups:
             logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (IGNORED)")
 
         elif message.startswith("cls"):
