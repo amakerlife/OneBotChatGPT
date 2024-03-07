@@ -43,10 +43,7 @@ def handle_request():
         elif message.startswith(chat_prefix):  # 私聊 Text to Text
             logger.info(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message} (Text to Text)")
             sender_history = private_chat_history.get(sender_id, [])
-            chat_prefix_len = len(chat_prefix)
-            if chat_prefix != "":
-                chat_prefix_len += 1
-            message = message[chat_prefix_len:]
+            message = message[len(chat_prefix):]
             logger.info(f"Processing chat prompt: {message}")
             answer, sender_history, status = chat(message, sender_history)
             if status != 0:
@@ -63,8 +60,7 @@ def handle_request():
                 logger.warning("Draw prefix not set, ignored")
                 send_private_message(sender_id, "[AI] The feature is not enabled")
                 return '', 204
-            draw_prefix_len = len(draw_prefix) + 1
-            message = message[draw_prefix_len:]
+            message = message[len(draw_prefix):]
             logger.info(f"Processing draw prompt: {message}")
             url, status = draw(message)
             if status != 0:
@@ -93,10 +89,7 @@ def handle_request():
 
         elif message.startswith(chat_prefix):  # 群聊 Text to Text
             logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (Text to Text)")
-            chat_prefix_len = len(chat_prefix)
-            if chat_prefix != "":
-                chat_prefix_len += 1
-            message = message[chat_prefix_len:]
+            message = message[len(chat_prefix):]
             logger.info(f"Processing chat prompt: {message}")
             answer, group_history, status = chat(message, group_history)
             if status != 0:
@@ -113,8 +106,7 @@ def handle_request():
                 logger.warning("Draw prefix not set, ignored")
                 send_group_message(group_id, sender_id, "[AI] The feature is not enabled")
                 return '', 204
-            draw_prefix_len = len(draw_prefix) + 1
-            message = message[draw_prefix_len:]
+            message = message[len(draw_prefix):]
             logger.info(f"Processing draw prompt: {message}")
             url, status = draw(message)
             if status != 0:
