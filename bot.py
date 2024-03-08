@@ -35,7 +35,7 @@ def handle_request():
 
     elif message_type == "private":  # 私聊消息
         if message.startswith("cls"):
-            logger.info(f"Private: {sender_id}({sender_nickname}) -> Unknown User: {message}")
+            logger.info(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message}")
             private_chat_history[sender_id] = []
             logger.success("Chat history cleared")
             send_private_message(sender_id, "[AI] Chat history cleared")

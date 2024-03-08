@@ -12,13 +12,15 @@ timeout = chatgpt_config.timeout
 
 
 def chat(message, history):
+    messages = history
+    messages.append({"role": "user", "content": message})
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token}",
     }
     data = {
         "model": chat_model,
-        "messages": history
+        "messages": messages
     }
     status = -1  # -1: undefined, 0: ok, 1: response json error, 2: HTTP status error, 3: timeout
     try:
