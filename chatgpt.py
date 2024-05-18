@@ -8,6 +8,7 @@ draw_endpoint = chatgpt_config.draw_endpoint
 token = chatgpt_config.token
 chat_model = chatgpt_config.chat_model
 draw_model = chatgpt_config.draw_model
+max_tokens = chatgpt_config.max_tokens
 timeout = chatgpt_config.timeout
 
 
@@ -20,6 +21,7 @@ def chat(message, history):
     }
     data = {
         "model": chat_model,
+        "max_tokens": max_tokens,
         "messages": messages
     }
     status = -1  # -1: undefined, 0: ok, 1: response json error, 2: HTTP status error, 3: timeout

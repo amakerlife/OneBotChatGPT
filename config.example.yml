@@ -2,6 +2,7 @@
 onebot:
   # OneBot 正向 HTTP 地址
   http_url: "http://localhost:3000"
+  access_token: ""
 
 # ChatGPT 设置
 chatgpt:
@@ -12,6 +13,7 @@ chatgpt:
   token: ""
   chat_model: "gpt-3.5-turbo"
   draw_model: "gpt-3.5-turbo"
+  max_tokens: 2048
   # 请求超时时间（秒）
   timeout: 180
 

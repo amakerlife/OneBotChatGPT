@@ -5,17 +5,19 @@ config_path = "config.yml"
 
 
 class OnebotConfig:
-    def __init__(self, http_url):
+    def __init__(self, http_url, access_token):
         self.http_url = http_url
+        self.access_token = access_token
 
 
 class ChatgptConfig:
-    def __init__(self, chat_endpoint, draw_endpoint, token, chat_model, draw_model, timeout):
+    def __init__(self, chat_endpoint, draw_endpoint, token, chat_model, draw_model, max_tokens, timeout):
         self.chat_endpoint = chat_endpoint
         self.draw_endpoint = draw_endpoint
         self.token = token
         self.chat_model = chat_model
         self.draw_model = draw_model
+        self.max_tokens = max_tokens
         self.timeout = timeout
 
 
