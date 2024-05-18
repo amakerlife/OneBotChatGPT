@@ -170,7 +170,7 @@ def image_message(text, image_list, request_data):
             logger.info(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {text} (Text with Image to Text)")
             sender_history = private_chat_history.get(sender_id, [])
             text = text[len(chat_prefix):]
-            logger.info(f"Processing chat prompt: {text} with image(s) {image_list}")
+            logger.info(f"Processing chat prompt: {text} with image(s)")
             answer, sender_history, status = chat_with_image(text, image_list, sender_history)
             if status != 0:
                 logger.error(answer)
