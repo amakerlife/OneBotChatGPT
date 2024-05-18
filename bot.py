@@ -51,8 +51,6 @@ def process_message(request_data):
     if not flag:
         image_list = [message[1] for message in message_list if message[0] == "image"]
         text = "".join([message[1] for message in message_list if message[0] == "text"])
-        for i in range(len(image_list)):
-            image_list[i] = image_to_base64(image_list[i])
         image_message(text, image_list, request_data)
         return
     else:
@@ -76,7 +74,6 @@ def text_message(message, request_data):
         if message.startswith("cls"):
             logger.info(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message}")
             private_chat_history[sender_id] = []
-            logger.success("Chat history cleared")
             send_private_message(sender_id, "[AI] Chat history cleared")
 
         elif message.startswith(chat_prefix):  # 私聊 Text to Text
@@ -120,7 +117,6 @@ def text_message(message, request_data):
         elif message.startswith("cls"):
             logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message}")
             group_chat_history[group_id] = []
-            logger.success("Chat history cleared")
             send_group_message(group_id, sender_id, "[AI] Chat history cleared")
 
         elif message.startswith(chat_prefix):  # 群聊 Text to Text
@@ -170,6 +166,8 @@ def image_message(text, image_list, request_data):
             logger.info(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {text} (Text with Image to Text)")
             sender_history = private_chat_history.get(sender_id, [])
             text = text[len(chat_prefix):]
+            for i in range(len(image_list)):
+                image_list[i] = image_to_base64(image_list[i])
             logger.info(f"Processing chat prompt: {text} with image(s)")
             answer, sender_history, status = chat_with_image(text, image_list, sender_history)
             if status != 0:

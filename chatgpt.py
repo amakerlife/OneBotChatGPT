@@ -63,6 +63,7 @@ def chat_with_image(message, images, history):
     }
     status = -1  # -1: undefined, 0: ok, 1: response json error, 2: HTTP status error, 3: timeout
     try:
+        logger.debug(data)
         response = requests.post(chat_endpoint, headers=headers, data=json.dumps(data), timeout=(30, int(timeout)))
         if response.status_code == 200:
             result = response.json()

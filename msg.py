@@ -26,7 +26,7 @@ def send_private_message(user_id, content):
     if response.status_code == 200:
         result = response.json()
         if result["status"] == "ok":
-            logger.success(f"Successfully sent message: {content}")
+            logger.info(f"Successfully sent message: {content}")
             return True
         else:
             logger.warning(f"Failed to send message, response: {str(result)}")
@@ -59,7 +59,7 @@ def send_group_message(group_id, sender_id, content):
     if response.status_code == 200:
         result = response.json()
         if result["status"] == "ok":
-            logger.success(f"Successfully sent message: {content}")
+            logger.info(f"Successfully sent message: {content}")
             return True
         else:
             logger.warning(f"Failed to send message, response: {str(result)}")
@@ -88,7 +88,7 @@ def send_private_img(user_id, content):
     if response.status_code == 200:
         result = response.json()
         if result["status"] == "ok":
-            logger.success(f"Successfully sent image: {content}")
+            logger.info(f"Successfully sent image: {content}")
             return True
         else:
             logger.warning(f"Failed to send image, response: {str(result)}")
@@ -121,7 +121,7 @@ def send_group_img(group_id, sender_id, content):
     if response.status_code == 200:
         result = response.json()
         if result["status"] == "ok":
-            logger.success(f"Successfully sent message: {content}")
+            logger.info(f"Successfully sent message: {content}")
             return True
         else:
             logger.warning(f"Failed to send message, response: {str(result)}")
@@ -129,6 +129,7 @@ def send_group_img(group_id, sender_id, content):
     else:
         logger.error(f"Failed to send message, status code: {str(response.status_code)}")
         return False
+
 
 def get_image(image_url):
     url = f"{http_url}/get_image"
@@ -143,7 +144,7 @@ def get_image(image_url):
     if response.status_code == 200:
         result = response.json()
         if result["status"] == "ok":
-            logger.success(f"Successfully get image: {image_url}")
+            logger.info(f"Successfully get image: {image_url}")
             return result["data"]["file"]
         else:
             logger.warning(f"Failed to get image, response: {str(result)}")
