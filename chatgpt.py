@@ -31,7 +31,44 @@ def chat(message, history):
             result = response.json()
             try:
                 answer = result["choices"][0]["message"]["content"]
-                history.append({"role": "user", "content": message})
+                history.append(messages)
+                history.append({"role": "assistant", "content": answer})
+                status = 0
+            except KeyError:
+                answer = f"Error: {response.text}"
+                status = 1
+        else:
+            answer = f"Error: {response.text}"
+            status = 2
+    except requests.exceptions.Timeout:
+        answer = "Error: Timeout"
+        status = 3
+    return answer, history, status
+
+
+def chat_with_image(message, images, history):
+    messages = history
+    content = [{"type": "text", "text": message}]
+    for image in images:
+        content.append({"type": "image_url", "image_url": {"url": image}})
+    messages.append({"role": "user", "content": content})
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}",
+    }
+    data = {
+        "model": chat_model,
+        "max_tokens": max_tokens,
+        "messages": messages
+    }
+    status = -1  # -1: undefined, 0: ok, 1: response json error, 2: HTTP status error, 3: timeout
+    try:
+        response = requests.post(chat_endpoint, headers=headers, data=json.dumps(data), timeout=(30, int(timeout)))
+        if response.status_code == 200:
+            result = response.json()
+            try:
+                answer = result["choices"][0]["message"]["content"]
+                history.append(messages)
                 history.append({"role": "assistant", "content": answer})
                 status = 0
             except KeyError:
