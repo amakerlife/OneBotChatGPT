@@ -13,7 +13,11 @@ chatgpt:
   token: ""
   chat_model: "gpt-3.5-turbo"
   draw_model: "gpt-3.5-turbo"
+
   max_tokens: 2048
+  # 系统提示词
+  system_prompt: ""
+
   # 请求超时时间（秒）
   timeout: 180
 

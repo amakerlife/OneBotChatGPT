@@ -9,11 +9,14 @@ token = chatgpt_config.token
 chat_model = chatgpt_config.chat_model
 draw_model = chatgpt_config.draw_model
 max_tokens = chatgpt_config.max_tokens
+system_prompt = chatgpt_config.system_prompt
 timeout = chatgpt_config.timeout
 
 
 def chat(message, history):
     messages = history
+    if not messages:
+        messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": message})
     headers = {
         "Content-Type": "application/json",
@@ -26,7 +29,7 @@ def chat(message, history):
     }
     status = -1  # -1: undefined, 0: ok, 1: response json error, 2: HTTP status error, 3: timeout
     try:
-        logger.debug(data)
+        # logger.debug(data)
         response = requests.post(chat_endpoint, headers=headers, data=json.dumps(data), timeout=(30, int(timeout)))
         if response.status_code == 200:
             result = response.json()
@@ -49,6 +52,8 @@ def chat(message, history):
 
 def chat_with_image(message, images, history):
     messages = history
+    if not messages:
+        messages.append({"role": "system", "content": system_prompt})
     content = [{"type": "text", "text": message}]
     for image in images:
         content.append({"type": "image_url", "image_url": {"url": image}})

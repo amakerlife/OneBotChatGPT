@@ -11,13 +11,14 @@ class OnebotConfig:
 
 
 class ChatgptConfig:
-    def __init__(self, chat_endpoint, draw_endpoint, token, chat_model, draw_model, max_tokens, timeout):
+    def __init__(self, chat_endpoint, draw_endpoint, token, chat_model, draw_model, max_tokens, system_prompt, timeout):
         self.chat_endpoint = chat_endpoint
         self.draw_endpoint = draw_endpoint
         self.token = token
         self.chat_model = chat_model
         self.draw_model = draw_model
         self.max_tokens = max_tokens
+        self.system_prompt = system_prompt
         self.timeout = timeout
 
 
