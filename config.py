@@ -29,8 +29,8 @@ class MessageConfig:
         self.allowed_groups = allowed_groups
 
 
-with open(config_path, "r") as file:
-    config_data = yaml.safe_load(file)
+with open(config_path, "r", encoding="utf-8") as f:
+    config_data = yaml.safe_load(f)
 
 try:
     onebot_config = OnebotConfig(**config_data.get("onebot", {}))
