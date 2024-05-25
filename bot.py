@@ -51,7 +51,7 @@ def process_message(request_data):
     if not flag:
         image_list = [message[1] for message in message_list if message[0] == "image"]
         text = "".join([message[1] for message in message_list if message[0] == "text"])
-        image_message(text, image_list, request_data)
+        mixed_message(text, image_list, request_data)
         return
     else:
         logger.warning(f"Unsupported message type: {str(message_list)}")
@@ -151,7 +151,7 @@ def text_message(message, request_data):
             logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (IGNORED)")
 
 
-def image_message(text, image_list, request_data):
+def mixed_message(text, image_list, request_data):
     global private_chat_history, group_chat_history
 
     self_id = request_data.get("self_id", "")
@@ -161,7 +161,7 @@ def image_message(text, image_list, request_data):
     if text.startswith("[AI]"):
         logger.info(f"Private: {sender_id}({sender_nickname}) -> Unknown User: {text} (IGNORED)")
 
-    elif message_type == "private":  # 私聊消息
+    elif message_type == "private":
         if text.startswith(chat_prefix):
             logger.info(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {text} (Text with Image to Text)")
             sender_history = private_chat_history.get(sender_id, [])
@@ -177,6 +177,32 @@ def image_message(text, image_list, request_data):
             private_chat_history[sender_id] = sender_history
             logger.info(f"Response from GPT: {answer}")
             send_private_message(sender_id, f"[AI] {answer}")
+
+    elif message_type == "group":
+        group_id = request_data.get("group_id", "")
+        group_history = group_chat_history.get(group_id, [])
+        if group_id not in allowed_groups:
+            logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {text} (IGNORED)")
+
+        elif text.startswith("cls"):
+            logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {text}")
+            group_chat_history[group_id] = []
+            send_group_message(group_id, sender_id, "[AI] Chat history cleared")
+
+        elif text.startswith(chat_prefix):  # 群聊 Text to Text
+            logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {text} (Text with Image to Text)")
+            text = text[len(chat_prefix):]
+            for i in range(len(image_list)):
+                image_list[i] = image_to_base64(image_list[i])
+            logger.info(f"Processing chat prompt: {text} with image(s)")
+            answer, group_history, status = chat_with_image(text, image_list, group_history)
+            if status != 0:
+                logger.error(answer)
+                send_group_message(group_id, sender_id, f"[AI] An error occurred(Code {status}): {answer}")
+                return
+            group_chat_history[group_id] = group_history
+            logger.info(f"Response from GPT: {answer}")
+            send_group_message(group_id, sender_id, f"[AI] {answer}")
 
 
 if __name__ == "__main__":
