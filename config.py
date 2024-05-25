@@ -23,9 +23,11 @@ class ChatgptConfig:
 
 
 class MessageConfig:
-    def __init__(self, chat_prefix, draw_prefix, allowed_groups):
+    def __init__(self, chat_prefix, draw_prefix, reply_quote, reply_mention, allowed_groups):
         self.chat_prefix = chat_prefix
         self.draw_prefix = draw_prefix
+        self.reply_quote = reply_quote
+        self.reply_mention = reply_mention
         self.allowed_groups = allowed_groups
 
 

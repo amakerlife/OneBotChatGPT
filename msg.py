@@ -7,20 +7,25 @@ http_url = onebot_config.http_url
 access_token = onebot_config.access_token
 
 
-def send_private_message(user_id, content):
+def send_private_message(user_id, content, origin_message_id=None):
     url = f"{http_url}/send_private_msg"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {access_token}",
     }
+    request_message = []
+    if origin_message_id:
+        request_message.append({
+            "type": "reply",
+            "data": {"id": origin_message_id}
+        })
+    request_message.append({
+        "type": "text",
+        "data": {"text": content}
+    })
     data = {
         "user_id": user_id,
-        "message": [
-            {
-                "type": "text",
-                "data": {"text": content}
-            }
-        ]
+        "message": request_message
     }
     response = requests.post(url, headers=headers, data=json.dumps(data))
     if response.status_code == 200:
@@ -36,24 +41,30 @@ def send_private_message(user_id, content):
         return False
 
 
-def send_group_message(group_id, sender_id, content):
+def send_group_message(group_id, sender_id, content, origin_message_id=None, at_sender=False):
     url = f"{http_url}/send_group_msg"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {access_token}",
     }
+    request_message = []
+    if origin_message_id:
+        request_message.append({
+            "type": "reply",
+            "data": {"id": origin_message_id}
+        })
+    if at_sender:
+        request_message.append({
+            "type": "at",
+            "data": {"qq": sender_id}
+        })
+    request_message.append({
+        "type": "text",
+        "data": {"text": f"{' ' if at_sender else ''}{content}"}
+    })
     data = {
         "group_id": group_id,
-        "message": [
-            {
-                "type": "at",
-                "data": {"qq": sender_id}
-            },
-            {
-                "type": "text",
-                "data": {"text": " " + content}
-            }
-        ]
+        "message": request_message
     }
     response = requests.post(url, headers=headers, data=json.dumps(data))
     if response.status_code == 200:
@@ -69,20 +80,25 @@ def send_group_message(group_id, sender_id, content):
         return False
 
 
-def send_private_img(user_id, content):
+def send_private_img(user_id, content, origin_message_id=None):
     url = f"{http_url}/send_private_msg"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {access_token}",
     }
+    request_message = []
+    if origin_message_id:
+        request_message.append({
+            "type": "reply",
+            "data": {"id": origin_message_id}
+        })
+    request_message.append({
+        "type": "image",
+        "data": {"file": content}
+    })
     data = {
         "user_id": user_id,
-        "message": [
-            {
-                "type": "image",
-                "data": {"file": content}
-            }
-        ]
+        "message": request_message
     }
     response = requests.post(url, headers=headers, data=json.dumps(data))
     if response.status_code == 200:
@@ -98,24 +114,30 @@ def send_private_img(user_id, content):
         return False
 
 
-def send_group_img(group_id, sender_id, content):
+def send_group_img(group_id, sender_id, content, origin_message_id=None, at_sender=False):
     url = f"{http_url}/send_group_msg"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {access_token}",
     }
+    request_message = []
+    if origin_message_id:
+        request_message.append({
+            "type": "reply",
+            "data": {"id": origin_message_id}
+        })
+    if at_sender:
+        request_message.append({
+            "type": "at",
+            "data": {"qq": sender_id}
+        })
+    request_message.append({
+        "type": "image",
+        "data": {"file": content}
+    })
     data = {
         "group_id": group_id,
-        "message": [
-            {
-                "type": "at",
-                "data": {"qq": sender_id}
-            },
-            {
-                "type": "image",
-                "data": {"file": content}
-            }
-        ]
+        "message": request_message
     }
     response = requests.post(url, headers=headers, data=json.dumps(data))
     if response.status_code == 200:

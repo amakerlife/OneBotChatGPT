@@ -12,6 +12,8 @@ group_chat_history = {}
 
 chat_prefix = message_config.chat_prefix
 draw_prefix = message_config.draw_prefix
+reply_quote = message_config.reply_quote
+reply_mention = message_config.reply_mention
 allowed_groups = message_config.allowed_groups
 
 
@@ -55,7 +57,8 @@ def process_message(request_data):
         return
     else:
         logger.warning(f"Unsupported message type: {str(message_list)}")
-        send_private_message(request_data.get("sender", {}).get("user_id", ""), "[AI] Unsupported message type")
+        send_private_message(request_data.get("sender", {}).get("user_id", ""), "[AI] Unsupported message type",
+                             request_data.get("message_id", None) if reply_quote else None)
         return
 
 
@@ -66,6 +69,7 @@ def text_message(message, request_data):
     sender_id = request_data.get("sender", {}).get("user_id", "")
     sender_nickname = request_data.get("sender", {}).get("nickname", "")
     message_type = request_data.get("message_type", "")
+    message_id = request_data.get("message_id", "")
 
     if message.startswith("[AI]"):
         logger.info(f"Private: {sender_id}({sender_nickname}) -> Unknown User: {message} (IGNORED)")
@@ -74,7 +78,7 @@ def text_message(message, request_data):
         if message.startswith("cls"):
             logger.info(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message}")
             private_chat_history[sender_id] = []
-            send_private_message(sender_id, "[AI] Chat history cleared")
+            send_private_message(sender_id, "[AI] Chat history cleared", message_id if reply_quote else None)
 
         elif message.startswith(chat_prefix):  # 私聊 Text to Text
             logger.info(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message} (Text to Text)")
@@ -84,26 +88,29 @@ def text_message(message, request_data):
             answer, sender_history, status = chat(message, sender_history)
             if status != 0:
                 logger.error(answer)
-                send_private_message(sender_id, f"[AI] An error occurred(Code {status}): {answer}")
+                send_private_message(sender_id, f"[AI] An error occurred(Code {status}): {answer}",
+                                     message_id if reply_quote else None)
                 return
             private_chat_history[sender_id] = sender_history
             logger.info(f"Response from GPT: {answer}")
-            send_private_message(sender_id, f"[AI] {answer}")
+            send_private_message(sender_id, f"[AI] {answer}", message_id if reply_quote else None)
 
         elif message.startswith(draw_prefix):  # 私聊 Text to Image
             logger.info(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message} (Text to Image)")
             if draw_prefix == "":
                 logger.warning("Draw prefix not set, ignored")
-                send_private_message(sender_id, "[AI] The feature is not enabled")
+                send_private_message(sender_id, "[AI] The feature is not enabled",
+                                     message_id if reply_quote else None)
             message = message[len(draw_prefix):]
             logger.info(f"Processing draw prompt: {message}")
             url, status = draw(message)
             if status != 0:
                 logger.error(url)
-                send_private_message(sender_id, f"[AI] An error occurred(Code {status}): {url}")
+                send_private_message(sender_id, f"[AI] An error occurred(Code {status}): {url}",
+                                     message_id if reply_quote else None)
                 return
             logger.info(f"Response from GPT: {url}")
-            send_private_img(sender_id, url)
+            send_private_img(sender_id, url, message_id if reply_quote else None)
 
         else:
             logger.info(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message} (IGNORED)")
@@ -117,7 +124,9 @@ def text_message(message, request_data):
         elif message.startswith("cls"):
             logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message}")
             group_chat_history[group_id] = []
-            send_group_message(group_id, sender_id, "[AI] Chat history cleared")
+            send_group_message(group_id, sender_id, "[AI] Chat history cleared",
+                               message_id if reply_quote else None,
+                               reply_mention)
 
         elif message.startswith(chat_prefix):  # 群聊 Text to Text
             logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (Text to Text)")
@@ -126,26 +135,34 @@ def text_message(message, request_data):
             answer, group_history, status = chat(message, group_history)
             if status != 0:
                 logger.error(answer)
-                send_group_message(group_id, sender_id, f"[AI] An error occurred(Code {status}): {answer}")
+                send_group_message(group_id, sender_id, f"[AI] An error occurred(Code {status}): {answer}",
+                                   message_id if reply_quote else None,
+                                   reply_mention)
                 return
             group_chat_history[group_id] = group_history
             logger.info(f"Response from GPT: {answer}")
-            send_group_message(group_id, sender_id, f"[AI] {answer}")
+            send_group_message(group_id, sender_id, f"[AI] {answer}",
+                               message_id if reply_quote else None,
+                               reply_mention)
 
         elif message.startswith(draw_prefix):  # 群聊 Text to Image
             logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (Text to Image)")
             if draw_prefix == "":
                 logger.warning("Draw prefix not set, ignored")
-                send_group_message(group_id, sender_id, "[AI] The feature is not enabled")
+                send_group_message(group_id, sender_id, "[AI] The feature is not enabled",
+                                   message_id if reply_quote else None,
+                                   reply_mention)
             message = message[len(draw_prefix):]
             logger.info(f"Processing draw prompt: {message}")
             url, status = draw(message)
             if status != 0:
                 logger.error(url)
-                send_group_message(group_id, sender_id, f"[AI] An error occurred(Code {status}): {url}")
+                send_group_message(group_id, sender_id, f"[AI] An error occurred(Code {status}): {url}",
+                                   message_id if reply_quote else None,
+                                   reply_mention)
                 return
             logger.info(f"Response from GPT: {url}")
-            send_group_img(group_id, sender_id, url)
+            send_group_img(group_id, sender_id, url, message_id if reply_quote else None, reply_mention)
 
         else:
             logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {message} (IGNORED)")
@@ -158,6 +175,8 @@ def mixed_message(text, image_list, request_data):
     sender_id = request_data.get("sender", {}).get("user_id", "")
     sender_nickname = request_data.get("sender", {}).get("nickname", "")
     message_type = request_data.get("message_type", "")
+    message_id = request_data.get("message_id", "")
+
     if text.startswith("[AI]"):
         logger.info(f"Private: {sender_id}({sender_nickname}) -> Unknown User: {text} (IGNORED)")
 
@@ -172,11 +191,12 @@ def mixed_message(text, image_list, request_data):
             answer, sender_history, status = chat_with_image(text, image_list, sender_history)
             if status != 0:
                 logger.error(answer)
-                send_private_message(sender_id, f"[AI] An error occurred(Code {status}): {answer}")
+                send_private_message(sender_id, f"[AI] An error occurred(Code {status}): {answer}",
+                                     message_id if reply_quote else None)
                 return
             private_chat_history[sender_id] = sender_history
             logger.info(f"Response from GPT: {answer}")
-            send_private_message(sender_id, f"[AI] {answer}")
+            send_private_message(sender_id, f"[AI] {answer}", message_id if reply_quote else None)
 
     elif message_type == "group":
         group_id = request_data.get("group_id", "")
@@ -187,7 +207,9 @@ def mixed_message(text, image_list, request_data):
         elif text.startswith("cls"):
             logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {text}")
             group_chat_history[group_id] = []
-            send_group_message(group_id, sender_id, "[AI] Chat history cleared")
+            send_group_message(group_id, sender_id, "[AI] Chat history cleared",
+                               message_id if reply_quote else None,
+                               reply_mention)
 
         elif text.startswith(chat_prefix):  # 群聊 Text to Text
             logger.info(f"Group: {sender_id}({sender_nickname}) -> {group_id}: {text} (Text with Image to Text)")
@@ -198,11 +220,15 @@ def mixed_message(text, image_list, request_data):
             answer, group_history, status = chat_with_image(text, image_list, group_history)
             if status != 0:
                 logger.error(answer)
-                send_group_message(group_id, sender_id, f"[AI] An error occurred(Code {status}): {answer}")
+                send_group_message(group_id, sender_id, f"[AI] An error occurred(Code {status}): {answer}",
+                                   message_id if reply_quote else None,
+                                   reply_mention)
                 return
             group_chat_history[group_id] = group_history
             logger.info(f"Response from GPT: {answer}")
-            send_group_message(group_id, sender_id, f"[AI] {answer}")
+            send_group_message(group_id, sender_id, f"[AI] {answer}",
+                               message_id if reply_quote else None,
+                               reply_mention)
 
 
 if __name__ == "__main__":

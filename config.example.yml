@@ -26,6 +26,10 @@ message:
   chat_prefix: "ask"
   # 绘图触发前缀
   draw_prefix: "draw"
+  # 全局回复是否引用原消息
+  reply_quote: true
+  # 群聊中回复时是否 @ 用户
+  reply_mention: true
   # 允许使用的群聊
   allowed_groups:
     - 123456789
