@@ -6,6 +6,12 @@ from config import onebot_config
 http_url = onebot_config.http_url
 access_token = onebot_config.access_token
 
+def truncate_string(s, length=30):
+    if len(s) > length:
+        return s[:length] + "..."
+    else:
+        return s
+
 
 def send_private_message(user_id, content, origin_message_id=None):
     url = f"{http_url}/send_private_msg"
@@ -31,7 +37,7 @@ def send_private_message(user_id, content, origin_message_id=None):
     if response.status_code == 200:
         result = response.json()
         if result["status"] == "ok":
-            logger.info(f"Successfully sent message: {content}")
+            logger.info(f"Successfully sent message: {truncate_string(content)}")
             return True
         else:
             logger.warning(f"Failed to send message, response: {str(result)}")
@@ -70,7 +76,7 @@ def send_group_message(group_id, sender_id, content, origin_message_id=None, at_
     if response.status_code == 200:
         result = response.json()
         if result["status"] == "ok":
-            logger.info(f"Successfully sent message: {content}")
+            logger.info(f"Successfully sent message: {truncate_string(content)}")
             return True
         else:
             logger.warning(f"Failed to send message, response: {str(result)}")

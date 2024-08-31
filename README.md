@@ -29,6 +29,7 @@ python bot.py
 - [ ] 显示 token 用量
 - [ ] 多 system_prompt
 - [ ] 简易管理功能（封禁、速度限制）
+- [ ] 语音输入
 - [ ] 正向 WebSocket 支持
 - [x] 重构控制台输出
 
