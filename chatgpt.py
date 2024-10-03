@@ -24,7 +24,7 @@ def chat(message, history):
     }
     data = {
         "model": chat_model,
-        "max_tokens": max_tokens,
+        "max_completion_tokens": max_tokens,
         "messages": messages
     }
     status = -1  # -1: undefined, 0: ok, 1: response json error, 2: HTTP status error, 3: timeout
@@ -64,7 +64,7 @@ def chat_with_image(message, images, history):
     }
     data = {
         "model": chat_model,
-        "max_tokens": max_tokens,
+        "max_completion_tokens": max_tokens,
         "messages": messages
     }
     status = -1  # -1: undefined, 0: ok, 1: response json error, 2: HTTP status error, 3: timeout
