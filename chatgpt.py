@@ -24,9 +24,12 @@ def chat(message, history):
     }
     data = {
         "model": chat_model,
-        "max_completion_tokens": max_tokens,
         "messages": messages
     }
+    if "o1" in chat_model:
+        data["max_completion_tokens"] = max_tokens
+    else:
+        data["max_tokens"] = max_tokens
     status = -1  # -1: undefined, 0: ok, 1: response json error, 2: HTTP status error, 3: timeout
     try:
         # logger.debug(data)
@@ -64,9 +67,12 @@ def chat_with_image(message, images, history):
     }
     data = {
         "model": chat_model,
-        "max_completion_tokens": max_tokens,
         "messages": messages
     }
+    if "o1" in chat_model:
+        data["max_completion_tokens"] = max_tokens
+    else:
+        data["max_tokens"] = max_tokens
     status = -1  # -1: undefined, 0: ok, 1: response json error, 2: HTTP status error, 3: timeout
     try:
         response = requests.post(chat_endpoint, headers=headers, data=json.dumps(data), timeout=(30, int(timeout)))
